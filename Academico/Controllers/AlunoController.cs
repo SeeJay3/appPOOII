@@ -44,9 +44,10 @@ namespace Academico.Controllers
             }
             catch (Exception ex)
             {
-                return NotFound();
+                ViewData["Erro"] = ex.Message;
+                return View(alunos);
             }
-            return View(alunos);
+            
         }
 
         public IActionResult Edit(int id)
