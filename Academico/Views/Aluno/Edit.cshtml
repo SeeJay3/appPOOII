@@ -1,10 +1,10 @@
 ﻿@model Academico.Models.Aluno
 
 @{
-    ViewData["Title"] = "Edit";
+    ViewData["Title"] = "Editando de dados de aluno";
 }
 
-<h1>Edit</h1>
+<h1>Editando</h1>
 
 <h4>Aluno</h4>
 <hr />
@@ -12,6 +12,7 @@
     <div class="col-md-4">
         <form asp-action="Edit">
             <div asp-validation-summary="ModelOnly" class="text-danger"></div>
+            <input type="hidden" asp-for="AlunoID" />
             <div class="form-group">
                 <label asp-for="Nome" class="control-label"></label>
                 <input asp-for="Nome" class="form-control" />
@@ -50,10 +51,35 @@
             <div class="form-group">
                 <label asp-for="Uf" class="control-label"></label>
                 <select asp-for="Uf" class="form-control">
+                    <option value="AC">Acre</option>
+                    <option value="AL">Alagoas</option>
+                    <option value="AP">Amapá</option>
+                    <option value="AM">Amazonas</option>
+                    <option value="BA">Bahia</option>
+                    <option value="CE">Ceará</option>
+                    <option value="DF">Distrito Federal</option>
                     <option value="ES">Espírito Santo</option>
+                    <option value="GO">Goiás</option>
+                    <option value="MA">Maranhão</option>
+                    <option value="MT">Mato Grosso</option>
+                    <option value="MS">Mato Grosso do Sul</option>
                     <option value="MG">Minas Gerais</option>
+                    <option value="PA">Pará</option>
+                    <option value="PB">Paraíba</option>
+                    <option value="PR">Paraná</option>
+                    <option value="PE">Pernambuco</option>
+                    <option value="PI">Piauí</option>
                     <option value="RJ">Rio de Janeiro</option>
+                    <option value="RN">Rio Grande do Norte</option>
+                    <option value="RS">Rio Grande do Sul</option>
+                    <option value="RO">Rondônia</option>
+                    <option value="RR">Roraima</option>
+                    <option value="SC">Santa Catarina</option>
                     <option value="SP">São Paulo</option>
+                    <option value="SE">Sergipe</option>
+                    <option value="TO">Tocantins</option>
+                    <option value="EX">Estrangeiro</option>
+                    <option value="NE">Não Especificado</option>
                 </select>
                 <span asp-validation-for="Uf" class="text-danger"></span>
             </div>
@@ -62,9 +88,8 @@
                 <input asp-for="Cep" class="form-control" />
                 <span asp-validation-for="Cep" class="text-danger"></span>
             </div>
-            <input type="hidden" asp-for="AlunoID"/>
             <div class="form-group">
-                <input type="submit" value="Salvar" class="btn btn-primary" />
+                <input type="submit" value="Save" class="btn btn-primary" />
             </div>
         </form>
     </div>

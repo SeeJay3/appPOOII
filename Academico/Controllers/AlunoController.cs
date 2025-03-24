@@ -1,28 +1,25 @@
-﻿using Academico.Models;
+﻿using Academico.Data;
+using Academico.Models;
 using Microsoft.AspNetCore.Mvc;
-using Microsoft.AspNetCore.Mvc.ModelBinding;
-using Microsoft.CodeAnalysis.Operations;
+using Microsoft.EntityFrameworkCore;
 
 namespace Academico.Controllers
 {
     public class AlunoController : Controller
     {
-        private static List<Aluno> alunos = new List<Aluno>()
+        private readonly AcademicoContext _context;
+
+        public AlunoController(AcademicoContext context)
         {
-            new Aluno()
-            {
-                AlunoID = 1,
-                Nome = "Aluno Teste",
-                Email = "aluno@mail.com",
-                Telefone = "(24)99999-9999",
-                Endereco = "Rua X, numero 1000",
-                Complemento = "AP 1001",
-                Bairro = "Bairro do Aluno",
-                Municipio = "Cidade do Aluno",
-                Uf = "RJ",
-                Cep = "27100-000"
-            }
-        };
+            _context = context;
+        }
+
+        public async Task<IActionResult> Index()
+        {
+            return View(await _context.Alunos.OrderBy(a => a.Nome).ToListAsync());
+        }
+
+
         public IActionResult Create()
         {
             return View();
@@ -30,58 +27,92 @@ namespace Academico.Controllers
 
         [HttpPost]
         [ValidateAntiForgeryToken]
-
-        public IActionResult Create([Bind("Nome", "Email", "Telefone", "Endereco", "Complemento", "Bairro", "Municipio", "Uf", "Cep")] Aluno aluno)
+        public async Task<IActionResult> Create([Bind("Nome", "Email", "Telefone", "Endereco", "Complemento", "Bairro", "Municipio", "Uf", "Cep")] Aluno aluno)
         {
-           try
+            try
             {
                 if (ModelState.IsValid)
                 {
-                    aluno.AlunoID = alunos.Select(a => a.AlunoID).DefaultIfEmpty(0).Max() + 1;
-                    alunos.Add(aluno);
+                    _context.Add(aluno);
+                    await _context.SaveChangesAsync();
                     return RedirectToAction(nameof(Index));
                 }
             }
-            catch (Exception ex)
+            catch(Exception ex)
             {
-                ViewData["Erro"] = ex.Message;
-                return View(alunos);
+                ModelState.AddModelError("", "Não foi possível inserir os dados.");
             }
-            
+
+            return View(aluno);
         }
 
-        public IActionResult Edit(int id)
+        public async Task<IActionResult> Edit(int? id)
         {
-            var aluno = alunos.FirstOrDefault(a => a.AlunoID == id);
+            if (id == null)
+            {
+                return NotFound();
+            }
+            var aluno = await _context.Alunos.FindAsync(id);
             if (aluno == null)
             {
                 return NotFound();
             }
             return View(aluno);
         }
+
         [HttpPost]
         [ValidateAntiForgeryToken]
-
-        public IActionResult Edit(Aluno aluno)
+        public async Task<IActionResult> Edit(int id, [Bind("AlunoID", "Nome", "Email", "Telefone", "Endereco", "Complemento", "Bairro", "Municipio", "Uf", "Cep")] Aluno aluno)
         {
-            alunos.Remove(alunos.Where(a => a.AlunoID == aluno.AlunoID).First());
-            alunos.Add(aluno);
-            return RedirectToAction("Index");
+            if (id != aluno.AlunoID)
+            {
+                return NotFound();
+            }
+            if (ModelState.IsValid)
+            {
+                try
+                {
+                    _context.Update(aluno);
+                    await _context.SaveChangesAsync();
+                }
+                catch (DbUpdateConcurrencyException)
+                {
+                    if (!AlunoExists(aluno.AlunoID))
+                    {
+                        return NotFound();
+                    }
+                    else
+                    {
+                        throw;
+                    }
+                }
+                return RedirectToAction(nameof(Index));
+            }
+            return View(aluno);
         }
-        
-        public IActionResult Details(int id)
+
+        public async Task<IActionResult> Details(int? id)
         {
-            var aluno = alunos.FirstOrDefault(a =>a.AlunoID == id);
+            if(id == null)
+            {
+                return NotFound();
+            }
+            var aluno = await _context.Alunos.SingleOrDefaultAsync(a => a.AlunoID == id);
             if (aluno == null)
             {
                 return NotFound();
             }
             return View(aluno);
+
         }
 
-        public IActionResult Delete(int id)
+        public async Task<IActionResult> Delete(int? id)
         {
-            var aluno = alunos.FirstOrDefault(a => a.AlunoID == id);
+            if (id == null)
+            {
+                return NotFound();
+            }
+            var aluno = await _context.Alunos.SingleOrDefaultAsync(a => a.AlunoID == id);
             if (aluno == null)
             {
                 return NotFound();
@@ -91,29 +122,19 @@ namespace Academico.Controllers
 
         [HttpPost, ActionName("Delete")]
         [ValidateAntiForgeryToken]
-
-        public IActionResult DeleteConfirmed(int id)
+        public async Task<IActionResult> DeleteConfirmed(int id)
         {
-            try
-            {
-                var aluno = alunos.FirstOrDefault(a => a.AlunoID == id);
-                if (aluno == null)
-                {
-                    return NotFound();
-                }
-                alunos.Remove(aluno);
-                return RedirectToAction(nameof(Index));
-            }
-            catch (Exception ex)
-            {
-                ModelState.AddModelError("", $"Não foi possível excluir o aluno: {ex.Message}");
-            }
-            return View(alunos);
+            var aluno = await _context.Alunos.FindAsync(id);
+            _context.Alunos.Remove(aluno);
+            await _context.SaveChangesAsync();
+            return RedirectToAction(nameof(Index));
         }
 
-        public IActionResult Index()
+        public bool AlunoExists(int id)
         {
-            return View(alunos);
+            return _context.Alunos.Any(e => e.AlunoID == id);
         }
+
+        
     }
 }
